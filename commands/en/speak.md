@@ -25,6 +25,5 @@ Answer in ONE line, nothing else:
 - `APAGADA otras=0`  -> "Voice off here — no session is talking to you."
 - `APAGADA otras=N`  -> "Voice off here. N window(s) are still speaking."
 
-If they ask to turn off ALL of them, run
-`bash ~/.claude/hooks/voz-toggle.sh --todas-no` and answer
-"Voice off in every session."
+If they ask to turn off ALL of them, that is `/silence` — run
+`bash ~/.claude/hooks/voz-silencio.sh` and answer "Voice off in every session."

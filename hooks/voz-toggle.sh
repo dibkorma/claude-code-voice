@@ -49,9 +49,9 @@ case "${1:-}" in
     fi
     ;;
   --todas-no)
-    rm -f "$D"/* 2>/dev/null
-    callar_esta
-    echo "TODAS APAGADAS"
+    # delega en el apagón general: una sola implementación, no dos que se
+    # desincronizan (el toggle no sabía matar reproductores sueltos)
+    bash "$HOME/.claude/hooks/voz-silencio.sh"
     ;;
   *)
     NOMBRE="${1:-}"

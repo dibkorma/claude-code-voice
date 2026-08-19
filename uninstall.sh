@@ -35,13 +35,13 @@ if [ "$SI" = 0 ] && [ "$SECO" = 0 ]; then
   case "$r" in y|Y|yes) ;; *) decir "Nothing done."; exit 0 ;; esac
 fi
 
-for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh \
+for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh voz-silencio.sh \
          voz-reproducir.sh voz-runner.py voz_comun.py; do
   [ -e "$DESTINO/hooks/$f" ] && corre "$DESTINO/hooks/$f"
 done
 [ -d "$DESTINO/hooks/tests" ] && corre "$DESTINO/hooks/tests"
 [ -d "$DESTINO/hooks/.venv" ] && corre "$DESTINO/hooks/.venv"
-for c in hablar donde-estamos speak catch-me-up; do
+for c in hablar donde-estamos silencio speak catch-me-up silence; do
   [ -e "$DESTINO/commands/$c.md" ] && corre "$DESTINO/commands/$c.md"
 done
 for e in voz.conf voz-on.d .voz-cola .voz.pid .voz-runner.lock .voz-ya-dijo \

@@ -10,6 +10,7 @@ voice**, per session, so you can work while looking somewhere else.
 /speak MAGU             ->  ...and calls itself "MAGU" when several talk at once
 /catch-me-up            ->  30 seconds of "here's where we left off"
 /speak                  ->  off again
+/silence                ->  every window quiet, from any window
 ```
 
 It exists because of a specific way of working: many Claude Code windows open at
@@ -106,6 +107,7 @@ Then open Claude Code — hooks are read at startup — and type `/speak`.
 | `/speak` | Toggle the voice **in this window** |
 | `/speak MAGU` | Turn it on and name the window `MAGU` |
 | `/catch-me-up` | Speak ~90 words of where we left off, and leave bullets on screen |
+| `/silence` | Kill switch: every session off, cut what's playing, drop the queue |
 
 Naming windows only matters when several are speaking: with two or more on, every
 sentence starts with the name, so you know who is talking without looking.
@@ -114,13 +116,16 @@ sentence starts with the name, so you know who is talking without looking.
 outranks a background setting. It summarizes from the conversation it already has
 in context, not by reading files, so it is fast and it is about *your* session.
 
-Under the hood both commands are thin: they just run
-`~/.claude/hooks/voz-toggle.sh` and `~/.claude/hooks/decir.sh`. To turn every
-window off at once:
+`/silence` is the panic button — it works from any window, including one whose
+own voice is off, and it also sweeps up any orphaned player process. Turning a
+window back on is `/speak` again.
+
+Under the hood the commands are thin wrappers over the scripts, so they work
+from a plain shell too:
 
 ```bash
-bash ~/.claude/hooks/voz-toggle.sh --todas-no   # all off
-bash ~/.claude/hooks/voz-toggle.sh --estado     # is this one on? how many others?
+bash ~/.claude/hooks/voz-silencio.sh          # everything quiet
+bash ~/.claude/hooks/voz-toggle.sh --estado   # is this one on? how many others?
 ```
 
 ---
@@ -238,6 +243,7 @@ Every file is short and commented with *why* it is the way it is:
 | `hooks/voz-runner.py` | Plays the queue one at a time, holding a lock |
 | `hooks/voz-reproducir.sh` | edge-tts -> mp3 -> player, with fallbacks and cleanup |
 | `hooks/voz-toggle.sh` | `/speak`: the per-session on/off switch |
+| `hooks/voz-silencio.sh` | `/silence`: the kill switch, from any window |
 | `hooks/decir.py` | `/catch-me-up`: says a whole summary, even when off |
 | `hooks/tests/` | 4 tests. None of them make a sound |
 

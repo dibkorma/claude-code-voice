@@ -24,5 +24,6 @@ Responde en UNA linea, sin explicar nada mas:
 - `APAGADA otras=0`  -> "Voz apagada aqui — ninguna sesion te habla."
 - `APAGADA otras=N`  -> "Voz apagada aqui. Siguen hablando N ventana(s)."
 
-Si te pide apagar TODAS, corre `bash ~/.claude/hooks/voz-toggle.sh --todas-no`
-y responde "Voz apagada en todas las sesiones."
+Si te pide apagar TODAS, eso es `/silencio` — corre
+`bash ~/.claude/hooks/voz-silencio.sh` y responde "Voz apagada en todas las
+sesiones."

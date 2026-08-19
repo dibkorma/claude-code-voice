@@ -10,6 +10,7 @@ por ventana, y puedas trabajar mirando otra cosa.
 /hablar MAGU            ->  ...y se llama "MAGU" cuando hay varias hablando
 /donde-estamos          ->  30 segundos de "dónde quedamos"
 /hablar                 ->  apagada otra vez
+/silencio               ->  todas mudas, desde cualquier ventana
 ```
 
 Nació de una forma concreta de trabajar: muchas ventanas de Claude Code abiertas
@@ -105,6 +106,7 @@ Después abre Claude Code — los hooks se leen al arrancar — y escribe `/habl
 | `/hablar` | Prende o apaga la voz **en esta ventana** |
 | `/hablar MAGU` | La prende y le pone `MAGU` de nombre a la ventana |
 | `/donde-estamos` | Te habla ~90 palabras de dónde quedaste y deja viñetas en pantalla |
+| `/silencio` | Apagón general: todas las sesiones, corta lo que suena y tira la cola |
 
 Ponerle nombre a la ventana solo importa cuando hay varias hablando: con dos o
 más prendidas, cada frase arranca diciendo el nombre, para que sepas quién te
@@ -114,13 +116,16 @@ habla sin mirar.
 que el ajuste de fondo. Resume de la conversación que ya tiene en contexto, no
 leyendo archivos: por eso es rápido y va de *tu* sesión.
 
-Por dentro los dos comandos son finitos: corren
-`~/.claude/hooks/voz-toggle.sh` y `~/.claude/hooks/decir.sh`. Para apagar todas
-las ventanas de un golpe:
+`/silencio` es el botón de pánico: sirve desde cualquier ventana, incluso una
+que tenga su propia voz apagada, y además barre cualquier reproductor que se
+haya quedado suelto. Para volver a prender una ventana, `/hablar`.
+
+Por dentro los comandos son envoltorios finitos de los scripts, así que también
+sirven desde una terminal normal:
 
 ```bash
-bash ~/.claude/hooks/voz-toggle.sh --todas-no   # todas apagadas
-bash ~/.claude/hooks/voz-toggle.sh --estado     # ¿esta está prendida? ¿cuántas otras?
+bash ~/.claude/hooks/voz-silencio.sh          # todo en silencio
+bash ~/.claude/hooks/voz-toggle.sh --estado   # ¿esta está prendida? ¿cuántas otras?
 ```
 
 ---
@@ -238,6 +243,7 @@ Cada archivo es corto y está comentado con el *porqué*:
 | `hooks/voz-runner.py` | Reproduce la cola uno por uno, con un lock |
 | `hooks/voz-reproducir.sh` | edge-tts -> mp3 -> reproductor, con respaldos y limpieza |
 | `hooks/voz-toggle.sh` | `/hablar`: el interruptor por sesión |
+| `hooks/voz-silencio.sh` | `/silencio`: el apagón general, desde cualquier ventana |
 | `hooks/decir.py` | `/donde-estamos`: dice un resumen entero, aunque esté apagada |
 | `hooks/tests/` | 4 pruebas. Ninguna suena |
 

@@ -64,7 +64,7 @@ esac
 # --- 2. the engine -----------------------------------------------------------
 paso "2. Installing the engine into $DESTINO/hooks/"
 corre mkdir -p "$DESTINO/hooks/tests/bin" "$DESTINO/commands"
-for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh \
+for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh voz-silencio.sh \
          voz-reproducir.sh voz-runner.py voz_comun.py; do
   if [ -e "$DESTINO/hooks/$f" ] && ! cmp -s "$AQUI/hooks/$f" "$DESTINO/hooks/$f"; then
     SELLO="$(date +%Y%m%d-%H%M%S)"
@@ -76,7 +76,8 @@ for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh \
 done
 corre chmod +x "$DESTINO/hooks/hablar.sh" "$DESTINO/hooks/callar.sh" \
                 "$DESTINO/hooks/decir.sh" "$DESTINO/hooks/voz-toggle.sh" \
-                "$DESTINO/hooks/voz-reproducir.sh" 2>/dev/null || true
+                "$DESTINO/hooks/voz-reproducir.sh" \
+                "$DESTINO/hooks/voz-silencio.sh" 2>/dev/null || true
 
 paso "3. Installing the tests into $DESTINO/hooks/tests/"
 for f in comun.py correr-todas.sh voz-reproducir.sh test_voz_callar.py \
