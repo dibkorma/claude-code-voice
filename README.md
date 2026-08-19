@@ -42,9 +42,11 @@ If all you want is to *talk* to Claude, you don't need this repo — skip to
 - **Per-session voice.** `/speak` turns on the window you ran it in. Every other
   window stays silent. Ten background jobs finishing at once don't talk over each
   other.
-- **As long as you want to listen.** The Stop hook speaks the first ~900
-  characters — about 47 seconds — always cut at the end of a sentence, never
-  mid-word. `CLAUDE_VOZ_MAX=350` gets you a headline; `0` reads the whole reply.
+- **The whole reply, by default.** No cap: it reads the answer out, however long
+  it is. Set `CLAUDE_VOZ_MAX` to a number of characters for a shorter version —
+  measured, 350 is about 19 seconds, 900 about 47. Any cut lands at the end of a
+  sentence, never mid-word. (Code, paths, links and tables are stripped either
+  way, so a reply full of them speaks much shorter than it looks.)
 - **Written for the ear.** Code blocks, file paths, URLs, tables, markdown and
   emoji are stripped before speaking. Nobody wants `~/.config/foo/bar.py` read
   out loud, character by character.
@@ -196,7 +198,7 @@ Environment variables, for the rest:
 |---|---|---|
 | `CC_EDGE_TTS` | auto | Path to `edge-tts` if it isn't on your `PATH` |
 | `CC_REPRODUCTOR` | auto | Command that plays an mp3 (`afplay`, `ffplay`, `mpv`) |
-| `CLAUDE_VOZ_MAX` | `900` | Characters spoken per reply (~47s). `0` = no limit |
+| `CLAUDE_VOZ_MAX` | `0` | Characters spoken per reply. `0` = no limit, read it all |
 | `CLAUDE_VOZ_MAX_RESUMEN` | `0` | Characters for `/catch-me-up`. `0` = the whole thing |
 | `CLAUDE_VOZ_COLA_MAX` | `3` | How many sentences may wait their turn |
 | `CLAUDE_VOZ_CADUCIDAD` | `300` | Seconds before a queued sentence is too stale to say |
@@ -221,7 +223,7 @@ and listen. `en-US-AvaNeural`, `en-US-AndrewNeural`, `es-MX-DaliaNeural` and
                                                      (~/.claude/voz-on.d/<sid8>)
                                                              | yes
                                                     strip code/paths/markdown
-                                                    cut at 900 chars, sentence end
+                                                     strip, cut only if capped
                                                     prefix window name if >1 on
                                                              |
                                                      voz_comun.decir()

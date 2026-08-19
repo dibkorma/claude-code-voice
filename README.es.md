@@ -43,9 +43,11 @@ y corre `/voice`.
 
 - **Voz por sesión.** `/hablar` prende la ventana donde lo corriste. Las demás
   siguen mudas. Diez trabajos de fondo terminando juntos no te hablan encima.
-- **Lo que quieras oír.** El hook Stop dice los primeros ~900 caracteres — unos
-  47 segundos — siempre cortando al final de una oración, nunca a media palabra.
-  Con `CLAUDE_VOZ_MAX=350` te da solo el titular; con `0` te lee todo.
+- **La respuesta entera, por defecto.** Sin tope: te lee la respuesta completa,
+  del largo que sea. Si la quieres más corta, `CLAUDE_VOZ_MAX` en caracteres —
+  medido, 350 son unos 19 segundos y 900 unos 47. Cualquier corte cae al final
+  de una oración, nunca a media palabra. (Código, rutas, links y tablas se
+  quitan igual, así que una respuesta llena de eso suena mucho más corta.)
 - **Escrito para el oído.** Antes de hablar quita bloques de código, rutas, URLs,
   tablas, markdown y emojis. Nadie quiere oír `~/.config/foo/bar.py` deletreado.
 - **Nunca se corta a sí mismo.** Las frases hacen cola y suenan una por una. El
@@ -196,7 +198,7 @@ Variables de entorno, para el resto:
 |---|---|---|
 | `CC_EDGE_TTS` | auto | Ruta a `edge-tts` si no está en el `PATH` |
 | `CC_REPRODUCTOR` | auto | Comando que reproduce un mp3 (`afplay`, `ffplay`, `mpv`) |
-| `CLAUDE_VOZ_MAX` | `900` | Caracteres por respuesta (~47s). `0` = sin límite |
+| `CLAUDE_VOZ_MAX` | `0` | Caracteres por respuesta. `0` = sin límite, lee todo |
 | `CLAUDE_VOZ_MAX_RESUMEN` | `0` | Caracteres para `/donde-estamos`. `0` = entero |
 | `CLAUDE_VOZ_COLA_MAX` | `3` | Cuántas frases pueden esperar turno |
 | `CLAUDE_VOZ_CADUCIDAD` | `300` | Segundos antes de que una frase en cola quede rancia |
@@ -221,7 +223,7 @@ escúchalas. `es-MX-DaliaNeural`, `es-ES-ElviraNeural`, `en-US-AvaNeural` y
                                                    (~/.claude/voz-on.d/<sid8>)
                                                            | sí
                                                   quita código, rutas, markdown
-                                                  corta en 900, al fin de oración
+                                                  limpia; corta solo si hay tope
                                                   antepone el nombre si hay >1
                                                            |
                                                    voz_comun.decir()
