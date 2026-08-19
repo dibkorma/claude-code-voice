@@ -9,11 +9,14 @@ import datetime, json, os, sys, traceback
 sys.path.insert(0, os.path.join(os.path.expanduser("~"), ".claude", "hooks"))
 import voz_comun as voz
 
-MAX  = int(os.environ.get("CLAUDE_VOZ_MAX", "900"))
-# 900 caracteres son unos 47 segundos hablados (medido, no a ojo: 350 dan 19s
-# y 1600 dan 1m23s). Empezo en 350 —solo el titular— y el usuario pregunto si
-# podia leerle un parrafo entero: puede, el limite era una decision, no una
-# restriccion. Con CLAUDE_VOZ_MAX=0 lee TODO, sin recortar.
+MAX  = int(os.environ.get("CLAUDE_VOZ_MAX", "0"))
+# SIN TOPE: lee la respuesta entera, del largo que sea. Lo pidio el usuario el
+# 19-ago-2026 ("dejalo sin tope") despues de oir las tres duraciones.
+# Historia: empezo en 350 —solo el titular—, paso por 900 (un parrafo, ~35s).
+# Para volver a poner limite basta CLAUDE_VOZ_MAX=<caracteres>; medido, 350 dan
+# 19s, 900 dan 47s y 1600 dan 1m23s de audio.
+# Lo que igual NO se lee nunca: codigo, rutas, links, tablas y emojis — eso lo
+# quita limpiar(), asi que una respuesta con tabla suena mucho mas corta.
 HOME = os.path.expanduser("~")
 YA_DIJO = os.path.join(HOME, ".claude", ".voz-ya-dijo")
 LOG     = os.path.join(HOME, ".claude", "voz-debug.log")

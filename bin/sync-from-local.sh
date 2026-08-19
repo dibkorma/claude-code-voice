@@ -15,10 +15,13 @@ SOLO_MIRAR=0
 
 # Files that diverge ON PURPOSE and must NOT be blindly overwritten:
 #   hooks/voz-reproducir.sh   repo version is portable + reads voz.conf
-#   hooks/tests/voz-reproducir.sh   repo version logs 80 chars, not 40
 #   commands/es/donde-estamos.md    repo version isn't pinned to one dialect
 #   commands/es/hablar.md           repo version points at /silencio
-A_MANO="hooks/voz-reproducir.sh hooks/tests/voz-reproducir.sh commands/es/donde-estamos.md commands/es/hablar.md"
+#
+# The test double is NOT in that list on purpose: it evolves with the engine
+# (it has to imitate every mode the real player grows), and excluding it once
+# already shipped a broken test suite. It gets synced and re-patched instead.
+A_MANO="hooks/voz-reproducir.sh commands/es/donde-estamos.md commands/es/hablar.md"
 
 generalizar() {   # takes the personal names out of the comments
   perl -pi -e 's/\bde Mangan\b/del usuario/g; s/\ba Mangan\b/al usuario/g; s/\bMangan\b/el usuario/g;' "$1"
@@ -43,8 +46,8 @@ for f in hablar.sh hablar.py callar.sh decir.sh decir.py voz-toggle.sh \
 done
 
 echo "Tests:"
-for f in comun.py correr-todas.sh test_voz_callar.py test_voz_no_corta.py \
-         test_voz_por_sesion.py test_voz_sin_basura.py; do
+for f in comun.py correr-todas.sh voz-reproducir.sh test_voz_callar.py \
+         test_voz_no_corta.py test_voz_por_sesion.py test_voz_sin_basura.py; do
   copiar "hooks/tests/$f" "hooks/tests/$f"
 done
 
@@ -58,6 +61,7 @@ if [ "$SOLO_MIRAR" = 0 ]; then
   if grep -q "jq -r" "$AQUI/hooks/callar.sh"; then
     python3 "$AQUI/bin/parche-callar.py" "$AQUI/hooks/callar.sh"
   fi
+  python3 "$AQUI/bin/parche-doble-pruebas.py" "$AQUI/hooks/tests/voz-reproducir.sh"
   chmod +x "$AQUI/hooks/"*.sh "$AQUI/hooks/tests/"*.sh 2>/dev/null || true
 fi
 

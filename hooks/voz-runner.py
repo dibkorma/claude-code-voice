@@ -45,13 +45,35 @@ def entorno_de(txt):
     return entorno, extra
 
 
-def reproducir(txt):
+def preparar(txt, entorno):
+    """Deja el mp3 del SIGUIENTE trozo listo mientras suena el actual.
+
+    Es lo que hace usable el modo sin tope: edge-tts tarda ~15s en un texto
+    largo, y esa espera se la come el trozo que ya esta sonando."""
+    if txt is None or txt.with_suffix(".txt.mp3").exists():
+        return
+    try:
+        subprocess.Popen(["bash", REPRODUCIR, str(txt), "--solo-generar"],
+                         stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL,
+                         env=entorno)
+    except Exception:
+        pass
+
+
+def reproducir(txt, siguiente=None):
     entorno, extra = entorno_de(txt)
     sonando = txt.with_suffix(".txt.sonando")
+    listo = txt.with_suffix(".txt.mp3")
     try:
         txt.rename(sonando)
+        # el mp3 preparado viaja con su texto, o el reproductor no lo encuentra
+        if listo.exists():
+            listo.rename(sonando.with_name(sonando.name + ".mp3"))
     except OSError:
         return                      # se lo llevo un callar(): nada que hacer
+    preparar(siguiente, entorno)    # el de despues se va cocinando ya
     try:
         subprocess.run(["bash", REPRODUCIR, str(sonando)],
                        stdin=subprocess.DEVNULL,
@@ -61,7 +83,7 @@ def reproducir(txt):
     finally:
         # el reproductor ya lo borra en su trap; esto cubre el caso de que
         # muera de una forma que no lo dispare
-        for f in (sonando, extra):
+        for f in (sonando, extra, sonando.with_name(sonando.name + ".mp3")):
             try:
                 f.unlink()
             except OSError:
@@ -104,7 +126,7 @@ def main():
             except OSError:
                 pass
             continue
-        reproducir(txt)
+        reproducir(txt, cola[1] if len(cola) > 1 else None)
 
 
 main()

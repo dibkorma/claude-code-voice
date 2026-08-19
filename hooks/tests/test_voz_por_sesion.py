@@ -45,6 +45,9 @@ def limpiar():
 
 
 def main():
+    # las ventanas que el usuario tenga prendidas se apartan: si no, ES una de las
+    # ventanas de la prueba y el conteo sale mal
+    restaurar = comun.aislar_sesiones(voz)
     prendidas_antes = voz.sesiones_con_voz()
     limpiar()
 
@@ -98,6 +101,7 @@ def main():
     limpiar()
     if sorted(voz.sesiones_con_voz()) != sorted(prendidas_antes):
         fallos.append("la prueba dejo sucia la lista de sesiones con voz")
+    restaurar()          # devolverle sus ventanas tal como estaban
 
     if fallos:
         print("\nFALLA:")

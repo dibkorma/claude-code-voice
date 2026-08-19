@@ -248,23 +248,56 @@ def decir(texto, maximo, voz=None, vel=None, sid=None):
 
     # La voz/velocidad de ESTE texto viajan aparte: cuando le toque sonar, el
     # runner puede ser otro proceso con otro entorno.
-    if voz or vel:
-        with open(base + ".voz", "w") as f:
-            if voz:
-                f.write(f"CLAUDE_VOZ_SAY={voz}\n")
-            if vel:
-                f.write(f"CLAUDE_VOZ_VEL={vel}\n")
+    extra = ""
+    if voz:
+        extra += f"CLAUDE_VOZ_SAY={voz}\n"
+    if vel:
+        extra += f"CLAUDE_VOZ_VEL={vel}\n"
 
     # Se escribe con otra extension y se renombra: el renombrado es atomico, y
-    # asi el runner nunca alcanza a leer un texto a medio escribir.
-    with open(base + ".parcial", "w") as f:
-        f.write(t)
-    os.replace(base + ".parcial", base + ".txt")
+    # asi el runner nunca alcanza a leer un texto a medio escribir. Un texto
+    # largo va en varios archivos numerados, que la cola atiende en orden.
+    trozos = trocear(t)
+    for n, trozo in enumerate(trozos):
+        ruta = f"{base}-{n:03d}"
+        if extra:
+            with open(ruta + ".voz", "w") as f:
+                f.write(extra)
+        with open(ruta + ".parcial", "w") as f:
+            f.write(trozo)
+        os.replace(ruta + ".parcial", ruta + ".txt")
 
     # Si ya hay un runner atendiendo la cola, este se muere solo contra el lock
     # y el que manda recoge el texto al terminar el actual. El PIDF lo escribe
     # el runner que SI agarro el lock, no este de aqui.
     return _lanzar_runner(os.environ), t
+
+
+def trocear(t, tamano=700):
+    """Parte un texto largo en pedazos que terminan en punto.
+
+    Sin esto, una respuesta larga tarda una eternidad en ARRANCAR: edge-tts
+    genera el mp3 entero antes de que suene la primera palabra — medido, 3.640
+    caracteres tardaron 15 segundos en empezar. Troceado, la primera frase
+    suena en un par de segundos y el resto se va preparando mientras habla.
+    """
+    if len(t) <= tamano:
+        return [t]
+    trozos, resto = [], t
+    while len(resto) > tamano:
+        corte = resto[:tamano]
+        # cortar donde termina una oracion; si no hay, donde termina una palabra
+        i = max(corte.rfind(". "), corte.rfind("! "), corte.rfind("? "),
+                corte.rfind(".\n"), corte.rfind("\n"))
+        if i < tamano // 3:
+            i = corte.rfind(" ")
+        if i < tamano // 3:
+            i = tamano - 1
+        trozos.append(resto[:i + 1].strip())
+        resto = resto[i + 1:].lstrip()
+    if resto.strip():
+        trozos.append(resto.strip())
+    return [x for x in trozos if x]
 
 
 def _podar_cola():
@@ -274,7 +307,16 @@ def _podar_cola():
     esa frase se termina, que es justo lo que pidio el usuario."""
     try:
         esperando = sorted(n for n in os.listdir(COLA) if n.endswith(".txt"))
-        for n in esperando[:max(0, len(esperando) - (COLA_MAX - 1))]:
+        # se agrupa por mensaje (todo lo anterior al "-000"): los trozos de una
+        # misma respuesta son UNA cosa, y podar uno la dejaria coja
+        mensajes = []
+        for n in esperando:
+            clave = n.rsplit("-", 1)[0]
+            if not mensajes or mensajes[-1][0] != clave:
+                mensajes.append((clave, []))
+            mensajes[-1][1].append(n)
+        sobran = max(0, len(mensajes) - (COLA_MAX - 1))
+        for n in [x for _, grupo in mensajes[:sobran] for x in grupo]:
             for f in (n, n[:-4] + ".voz"):
                 try:
                     os.remove(os.path.join(COLA, f))

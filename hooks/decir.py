@@ -11,7 +11,8 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.expanduser("~"), ".claude", "hooks"))
 import voz_comun as voz
 
-MAX = int(os.environ.get("CLAUDE_VOZ_MAX_RESUMEN", "1200"))
+MAX = int(os.environ.get("CLAUDE_VOZ_MAX_RESUMEN", "0"))
+# Sin tope tambien aqui: si el pide el resumen hablado, lo quiere entero.
 YA_DIJO = os.path.join(os.path.expanduser("~"), ".claude", ".voz-ya-dijo")
 
 if len(sys.argv) > 1 and sys.argv[1].strip():

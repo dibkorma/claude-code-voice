@@ -29,3 +29,28 @@ def restos_de_audio():
         return sorted(p.name for p in tmp.glob("voz.*"))
     except Exception:
         return []
+
+
+def aislar_sesiones(voz):
+    """Aparta las ventanas que el usuario tenga prendidas y devuelve como restaurarlas.
+
+    Sin esto, una prueba que cuenta ventanas con voz da resultados distintos
+    segun si el esta oyendo alguna: paso justo eso el 19-ago-2026, cuando la
+    prueba de "no digas el nombre habiendo una sola" fallo porque su propia
+    ventana era la segunda.
+    """
+    import pathlib as _p
+    d = _p.Path(voz.VOZ_ON_D)
+    d.mkdir(parents=True, exist_ok=True)
+    guardadas = {f.name: f.read_text() for f in d.iterdir() if f.is_file()}
+    for f in d.iterdir():
+        if f.is_file():
+            f.unlink()
+
+    def restaurar():
+        for f in d.iterdir():
+            if f.is_file():
+                f.unlink()
+        for n, txt in guardadas.items():
+            (d / n).write_text(txt)
+    return restaurar

@@ -197,7 +197,7 @@ Environment variables, for the rest:
 | `CC_EDGE_TTS` | auto | Path to `edge-tts` if it isn't on your `PATH` |
 | `CC_REPRODUCTOR` | auto | Command that plays an mp3 (`afplay`, `ffplay`, `mpv`) |
 | `CLAUDE_VOZ_MAX` | `900` | Characters spoken per reply (~47s). `0` = no limit |
-| `CLAUDE_VOZ_MAX_RESUMEN` | `1200` | Characters for `/catch-me-up` |
+| `CLAUDE_VOZ_MAX_RESUMEN` | `0` | Characters for `/catch-me-up`. `0` = the whole thing |
 | `CLAUDE_VOZ_COLA_MAX` | `3` | How many sentences may wait their turn |
 | `CLAUDE_VOZ_CADUCIDAD` | `300` | Seconds before a queued sentence is too stale to say |
 

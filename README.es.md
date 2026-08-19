@@ -197,7 +197,7 @@ Variables de entorno, para el resto:
 | `CC_EDGE_TTS` | auto | Ruta a `edge-tts` si no está en el `PATH` |
 | `CC_REPRODUCTOR` | auto | Comando que reproduce un mp3 (`afplay`, `ffplay`, `mpv`) |
 | `CLAUDE_VOZ_MAX` | `900` | Caracteres por respuesta (~47s). `0` = sin límite |
-| `CLAUDE_VOZ_MAX_RESUMEN` | `1200` | Caracteres para `/donde-estamos` |
+| `CLAUDE_VOZ_MAX_RESUMEN` | `0` | Caracteres para `/donde-estamos`. `0` = entero |
 | `CLAUDE_VOZ_COLA_MAX` | `3` | Cuántas frases pueden esperar turno |
 | `CLAUDE_VOZ_CADUCIDAD` | `300` | Segundos antes de que una frase en cola quede rancia |
 
