@@ -1,0 +1,4 @@
+#!/bin/bash
+# say FALSO: si edge-tts falla, el reproductor cae aqui. Sin esto, una prueba
+# le hablaria al usuario por sorpresa.
+sleep 1

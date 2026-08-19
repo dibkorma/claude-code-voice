@@ -1,0 +1,4 @@
+#!/bin/bash
+# afplay FALSO para las pruebas: el script real corre completo (edge-tts genera
+# su mp3 de verdad, asi se puede comprobar que lo limpia), pero no suena nada.
+sleep 1
