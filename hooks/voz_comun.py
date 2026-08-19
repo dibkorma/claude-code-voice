@@ -118,8 +118,11 @@ def limpiar(texto):
 
 
 def recortar(t, maximo):
-    """Corta en el final de una oracion, nunca a mitad de palabra."""
-    if len(t) <= maximo:
+    """Corta en el final de una oracion, nunca a mitad de palabra.
+
+    Con maximo 0 (o menos) no recorta nada: es el "leeme todo" que pidio el usuario.
+    """
+    if maximo <= 0 or len(t) <= maximo:
         return t
     cut = t[:maximo]
     idx = max(cut.rfind(". "), cut.rfind("! "), cut.rfind("? "),

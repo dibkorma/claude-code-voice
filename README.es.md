@@ -43,8 +43,9 @@ y corre `/voice`.
 
 - **Voz por sesión.** `/hablar` prende la ventana donde lo corriste. Las demás
   siguen mudas. Diez trabajos de fondo terminando juntos no te hablan encima.
-- **Solo el titular.** El hook Stop dice los primeros ~350 caracteres de la
-  respuesta, cortando al final de una oración. No te lee el muro de texto.
+- **Lo que quieras oír.** El hook Stop dice los primeros ~900 caracteres — unos
+  47 segundos — siempre cortando al final de una oración, nunca a media palabra.
+  Con `CLAUDE_VOZ_MAX=350` te da solo el titular; con `0` te lee todo.
 - **Escrito para el oído.** Antes de hablar quita bloques de código, rutas, URLs,
   tablas, markdown y emojis. Nadie quiere oír `~/.config/foo/bar.py` deletreado.
 - **Nunca se corta a sí mismo.** Las frases hacen cola y suenan una por una. El
@@ -195,7 +196,7 @@ Variables de entorno, para el resto:
 |---|---|---|
 | `CC_EDGE_TTS` | auto | Ruta a `edge-tts` si no está en el `PATH` |
 | `CC_REPRODUCTOR` | auto | Comando que reproduce un mp3 (`afplay`, `ffplay`, `mpv`) |
-| `CLAUDE_VOZ_MAX` | `350` | Caracteres que habla el hook Stop por respuesta |
+| `CLAUDE_VOZ_MAX` | `900` | Caracteres por respuesta (~47s). `0` = sin límite |
 | `CLAUDE_VOZ_MAX_RESUMEN` | `1200` | Caracteres para `/donde-estamos` |
 | `CLAUDE_VOZ_COLA_MAX` | `3` | Cuántas frases pueden esperar turno |
 | `CLAUDE_VOZ_CADUCIDAD` | `300` | Segundos antes de que una frase en cola quede rancia |
@@ -220,7 +221,7 @@ escúchalas. `es-MX-DaliaNeural`, `es-ES-ElviraNeural`, `en-US-AvaNeural` y
                                                    (~/.claude/voz-on.d/<sid8>)
                                                            | sí
                                                   quita código, rutas, markdown
-                                                  corta en 350, al fin de oración
+                                                  corta en 900, al fin de oración
                                                   antepone el nombre si hay >1
                                                            |
                                                    voz_comun.decir()
@@ -246,6 +247,7 @@ Cada archivo es corto y está comentado con el *porqué*:
 | `hooks/voz-silencio.sh` | `/silencio`: el apagón general, desde cualquier ventana |
 | `hooks/decir.py` | `/donde-estamos`: dice un resumen entero, aunque esté apagada |
 | `hooks/tests/` | 4 pruebas. Ninguna suena |
+| `bin/sync-from-local.sh` | Trae el motor de vuelta de `~/.claude` al repo |
 
 ---
 
@@ -334,6 +336,10 @@ Los archivos y comentarios del motor están en español (`hablar.py`,
 `voz_comun.py`, `decir.py`) porque en ese idioma se escribió. Los comentarios son
 la documentación de verdad: cada uno dice por qué existe esa línea, casi siempre
 porque algo se rompió. Los comandos vienen en los dos idiomas.
+
+El motor se desarrolla en vivo en `~/.claude/hooks`, que es donde corre y donde
+se arregla. `./bin/sync-from-local.sh` lo trae de vuelta al repo y re-aplica lo
+que el repo hace distinto; con `--check` solo te dice qué difiere.
 
 Probado en macOS 14 (Apple Silicon), bash 3.2, python3 3.9, Claude Code 2.x.
 

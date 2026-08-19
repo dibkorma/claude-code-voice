@@ -9,7 +9,11 @@ import datetime, json, os, sys, traceback
 sys.path.insert(0, os.path.join(os.path.expanduser("~"), ".claude", "hooks"))
 import voz_comun as voz
 
-MAX  = int(os.environ.get("CLAUDE_VOZ_MAX", "350"))   # solo el titular
+MAX  = int(os.environ.get("CLAUDE_VOZ_MAX", "900"))
+# 900 caracteres son unos 47 segundos hablados (medido, no a ojo: 350 dan 19s
+# y 1600 dan 1m23s). Empezo en 350 —solo el titular— y el usuario pregunto si
+# podia leerle un parrafo entero: puede, el limite era una decision, no una
+# restriccion. Con CLAUDE_VOZ_MAX=0 lee TODO, sin recortar.
 HOME = os.path.expanduser("~")
 YA_DIJO = os.path.join(HOME, ".claude", ".voz-ya-dijo")
 LOG     = os.path.join(HOME, ".claude", "voz-debug.log")
