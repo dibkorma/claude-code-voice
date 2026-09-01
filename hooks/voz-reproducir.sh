@@ -9,10 +9,21 @@
 #   CC_VOZ_VEL        velocidad de edge-tts  (formato +20%, -10%, +0%)
 #   CC_EDGE_TTS       ruta al binario edge-tts, si no esta en el PATH
 #   CC_REPRODUCTOR    reproductor de mp3     (por defecto: el que encuentre)
+#                     Se parte en palabras a proposito, para que lleve sus
+#                     banderas ("mpv --no-video"). Por eso la RUTA no puede
+#                     tener espacios: se partiria y caeria al TTS del sistema
+#                     sin decir nada. Si la tuya los tiene, usa un enlace.
 #   CLAUDE_VOZ_SAY    voz del `say` de macOS (respaldo)
 #   CLAUDE_VOZ_VEL    velocidad del `say`    (palabras por minuto)
 set -u
 TXT="${1:?falta el archivo de texto}"
+# Segundo argumento opcional. `--solo-generar` deja el mp3 listo al lado del
+# texto ("$TXT.mp3") y NO suena: es como voz-runner.py precocina el trozo
+# siguiente mientras el actual esta sonando. Sin este modo, el runner lanzaba
+# el "preparar" como una reproduccion normal y se oian dos voces encimadas
+# (y el trozo desaparecia de la cola). El doble de prueba si lo imitaba, asi
+# que las pruebas pasaban con el defecto vivo.
+MODO="${2:-}"
 
 # --- Configuracion: ~/.claude/voz.conf ---------------------------------------
 # Lo escribe el instalador con la voz del idioma que elegiste, y se puede editar
@@ -39,7 +50,11 @@ VEL_SAY="${CLAUDE_VOZ_VEL:-215}"
 
 # Se limpia SIEMPRE, tambien si nos matan (callar.sh manda SIGTERM al grupo):
 # sin INT/TERM/HUP el mp3 a medias se quedaba en el temporal.
-limpiar() { rm -f "$TXT" "${MP3:-}" "${SEMILLA:-}" 2>/dev/null; }
+limpiar() {
+  # en modo preparar el texto sigue en la cola y NO es nuestro para borrarlo
+  [ "$MODO" = "--solo-generar" ] || rm -f "$TXT" 2>/dev/null
+  rm -f "${MP3:-}" "${SEMILLA:-}" 2>/dev/null
+}
 trap limpiar EXIT INT TERM HUP
 
 # Barrido de huerfanos viejos. Durante meses cada frase dejo un archivo tirado
@@ -96,16 +111,36 @@ tts_del_sistema() {
 
 EDGE="$(buscar_edge)"
 
-if [ -n "$EDGE" ]; then
-  # OJO: `mktemp -t voz` CREA el archivo y devuelve su ruta; al pegarle .mp3 se
-  # trabaja sobre otro nombre y el original quedaba huerfano. Se guarda aparte
-  # para borrarlo — habia 30 tirados cuando el usuario lo noto (ago-19-2026).
+# Deja en $MP3 un mp3 recien hecho con edge-tts. Devuelve 1 si no se pudo.
+# OJO: `mktemp -t voz` CREA el archivo y devuelve su ruta; al pegarle .mp3 se
+# trabaja sobre otro nombre y el original quedaba huerfano. Se guarda aparte
+# para borrarlo — habia 30 tirados cuando el usuario lo noto (ago-19-2026).
+generar_mp3() {
+  [ -n "$EDGE" ] || return 1
   SEMILLA="$(mktemp -t voz)"
   MP3="$SEMILLA.mp3"
-  if "$EDGE" --voice "$VOZ_EDGE" --rate="$VEL_EDGE" --file "$TXT" --write-media "$MP3" >/dev/null 2>&1 \
-     && [ -s "$MP3" ]; then
-    reproducir_mp3 "$MP3" && exit 0
+  "$EDGE" --voice "$VOZ_EDGE" --rate="$VEL_EDGE" --file "$TXT" --write-media "$MP3" >/dev/null 2>&1 \
+    && [ -s "$MP3" ]
+}
+
+# --- Modo preparar: cocina y se calla -----------------------------------------
+if [ "$MODO" = "--solo-generar" ]; then
+  if generar_mp3; then
+    # `mv` y luego vaciar MP3: ya no es nuestro, que el trap no se lo lleve.
+    mv -f "$MP3" "$TXT.mp3" 2>/dev/null && MP3=""
   fi
+  exit 0                       # sin edge-tts no se precocina nada: no es error
+fi
+
+# --- Modo normal: suena -------------------------------------------------------
+# Si el runner ya lo dejo listo, se aprovecha (es el punto de precocinarlo).
+if [ -s "$TXT.mp3" ]; then
+  MP3="$TXT.mp3"
+  reproducir_mp3 "$MP3" && exit 0
+fi
+
+if generar_mp3; then
+  reproducir_mp3 "$MP3" && exit 0
 fi
 
 # respaldo: sin edge-tts, sin red, mp3 vacio o sin reproductor de mp3
