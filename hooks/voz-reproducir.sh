@@ -51,11 +51,17 @@ VEL_SAY="${CLAUDE_VOZ_VEL:-215}"
 # Se limpia SIEMPRE, tambien si nos matan (callar.sh manda SIGTERM al grupo):
 # sin INT/TERM/HUP el mp3 a medias se quedaba en el temporal.
 limpiar() {
-  # en modo preparar el texto sigue en la cola y NO es nuestro para borrarlo
-  [ "$MODO" = "--solo-generar" ] || rm -f "$TXT" 2>/dev/null
+  # en modo preparar el texto y su mp3 siguen en la cola: NO son nuestros
+  [ "$MODO" = "--solo-generar" ] || rm -f "$TXT" "$TXT.mp3" 2>/dev/null
   rm -f "${MP3:-}" "${SEMILLA:-}" 2>/dev/null
 }
-trap limpiar EXIT INT TERM HUP
+trap limpiar EXIT
+# Con una senal NO basta con limpiar: hay que SALIR. Un trap que solo limpia
+# deja a bash seguir el guion, y al callar la voz MIENTRAS se generaba el mp3
+# el script caia al TTS del sistema... y volvia a hablar justo despues de que
+# el usuario pidiera silencio. (Vive en ~/.claude desde ago-19-2026; esta copia
+# portable nunca lo recibio porque el sync la excluye a mano.)
+trap 'limpiar; exit 143' INT TERM HUP
 
 # Barrido de huerfanos viejos. Durante meses cada frase dejo un archivo tirado
 # aqui (ver SEMILLA mas abajo); una hora de gracia para no tocar el de una voz
